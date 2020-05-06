@@ -77,36 +77,18 @@ vector<long long> find_seq(long long seq, long long n){
     vector<long long> vec;
     if (gauss(n) / 2 != gauss(seq)) {
         long long diff = gauss(n) / 2 - gauss(seq - 2);
-        if (diff < n) {
-            vec.push_back(seq - 2);
-            vec.push_back(diff);
-        } else {
+        if (diff < n) vec.push_back(seq - 2), vec.push_back(diff);
+        else {
             long long k = 1;
-            seq--;
-            diff = gauss(n) / 2 - gauss(seq);
-            while(!(diff >= seq + 1 && diff <= gauss(n) - gauss(n - k))){
-                diff += seq;
-                k++;
-                seq--;
-            }
+            for(--seq, diff = gauss(n) / 2 - gauss(seq); diff < seq + 1 || diff > gauss(n) - gauss(n - k); diff += seq, ++k,--seq);
             vec.push_back(seq);
             if(k > 1) {
-                vec.push_back(0);
-                vec.push_back(0);
-                for (int i = 1; i <= k - 2; ++i) {
-                    vec.push_back(n - (k - 2 - i));
-                    diff -= n - (k - 2 - i);
-                }
-                n -= k - 2;
-                vec[2] = n;
-                vec[1] = diff - n;
-            }else{
-                vec.push_back(diff);
-            }
+                vec.push_back(0); vec.push_back(0);
+                for (int i = 1; i <= k - 2; vec.push_back(n - (k - 2 - i)), diff -= n - (k - 2 - i), ++i);
+                n -= k - 2; vec[1] = diff - n; vec[2] = n;
+            }else vec.push_back(diff);
         }
-    }else{
-        vec.push_back(seq);
-    }
+    }else vec.push_back(seq);
     return vec;
 }
 
@@ -119,10 +101,8 @@ int main() {
         long long seq;
         if (gauss(n) % 2 == 0) seq = binary(1, n, gauss(n) / 2);
         else seq = binary(1, n, gauss(n) / 2 + 1);
-        if(gauss(n)/2 - gauss(seq) < 0){
-            seq--;
-        }
+        if(gauss(n)/2 - gauss(seq) < 0) seq--;
         printf("Case %d: %lld %lld\n", i + 1, gauss(n) % 2, hash_seq(find_seq(seq, n), B, M));
     }
     return 0;
-} 
+}
