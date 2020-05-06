@@ -6,8 +6,7 @@ inline long long gauss(long long n) {
     return n * (n + 1) / 2;
 }
 
-void
-matrix_mul(vector<vector<long long>> &a, vector<vector<long long>> &b, vector<vector<long long>> &res, long long m) {
+void matrix_mul(vector<vector<long long>> &a, vector<vector<long long>> &b, vector<vector<long long>> &res, long long m) {
     vector<vector<long long>> temp(a.size(), vector<long long>(a.size(), 0));
     for (int i = 0; i < a.size(); ++i)
         for (int j = 0; j < b[0].size(); ++j)
@@ -47,15 +46,14 @@ long long hash_seq(vector<long long> vec, long long B, long long M) {
                                     {1, 1, 0},
                                     {0, 1, 1}};
     vector<vector<long long>> mxres(3, vector<long long>(3, 0));
-    long long res;
+    long long res = 0;
     if (siz != 0) {
         matrix_pow(mx, mxres, siz, M);
         res = mxres[1][0] + mxres[2][0];
         res %= M;
-    } else res = 0;
+    }
     for (int i = 1; i < vec.size(); ++i) res = (res * B + vec[i]) % M;
-    if (res < 0) res += M;
-    return (long long) res;
+    return res;
 }
 
 vector<long long> find_seq(long long seq, long long n) {
