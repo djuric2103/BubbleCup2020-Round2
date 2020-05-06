@@ -1,9 +1,59 @@
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
+#include <iostream>
+#include <math.h>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <unordered_map>
+#include <random>
 //#define gauss(n) n*(n+1)/2
 using namespace std;
 
 inline long long gauss(long long n) {
     return n * (n + 1) / 2;
+}
+
+void matrix_mul(vector<vector<long long>> &a, vector<vector<long long>> &b, vector<vector<long long>> &res, long long m)
+{
+    vector<vector<long long>> temp(a.size(), vector<long long>(a.size(), 0));
+    for (int i = 0; i < a.size(); i++)
+    {
+        for (int j = 0; j < b[0].size(); j++)
+        {
+            for (int k = 0; k < b.size(); k++)
+            {
+                (temp[i][j] += a[i][k] * b[k][j]) %= m;
+            }
+        }
+    }
+    for (int i = 0; i < a.size(); i++)
+    {
+        for (int j = 0; j < b[0].size(); j++)
+        {
+            res[i][j] = temp[i][j];
+        }
+    }
+}
+
+void matrix_pow(vector<vector<long long>> &a, vector<vector<long long>> &res, long long n, long long m)
+{
+    if (n == 1)
+    {
+        for (int i = 0; i < a.size(); i++)
+        {
+            for (int j = 0; j < a.size(); j++)
+            {
+                res[i][j] = a[i][j];
+            }
+        }
+        return;
+    }
+    matrix_pow(a, res, n / 2, m);
+    matrix_mul(res, res, res, m);
+    if (n % 2 == 1)
+    {
+        matrix_mul(a, res, res, m);
+    }
 }
 
 long long binary(long long l, long long r, long long target) {
@@ -17,13 +67,46 @@ long long binary(long long l, long long r, long long target) {
 }
 
 long long hash_seq(long long siz, long long b, long long a, long long B, long long M) {
-    int res = 0;
-    for (int i = 1; i <= siz; ++i)
-        res = (res * B + i) % M;
+    vector<vector<long long>> mx = 
+    {
+        { B, 0, 0 },
+        { 1, 1, 0 },
+        { 0, 1, 1 }
+    };
+
+    vector<vector<long long>> mxres(3, vector<long long>(3, 0));
+    long long res;
+
+    if (siz != 0)
+    {
+        matrix_pow(mx, mxres, siz, M);
+        res = mxres[1][0] + mxres[2][0];
+        res %= M;
+    }
+    else
+    {
+        res = 0;
+    }
+
     if (b != -1)res = (res * B + b) % M;
     if (a != -1)res = (res * B + a) % M;
-    return res;
+    if (res < 0) res += M;
+    return (long long)res;
 
+}
+
+long long hash_simple(long long siz, long long b, long long a, long long B, long long M) {
+    long long res = 0;
+    for (int i = 1; i <= siz; i++)
+    {
+        res *= B;
+        res += i;
+        res %= M;
+    }
+    if (b != -1)res = (res * B + b) % M;
+    if (a != -1)res = (res * B + a) % M;
+    if (res < 0) res += M;
+    return (long long)res;
 }
 
 struct inpu{
@@ -45,7 +128,7 @@ int main() {
         in[i].cas = i + 1;
         scanf("%lld%lld%lld", &in[i].n, &in[i].B, &in[i].M);
     }
-    sort(in.begin(), in.end());
+    // sort(in.begin(), in.end());
 
     for (int i = 0; i < t; i++) {
         long long n = in[i].n, B=in[i].B, M =in[i].M;
