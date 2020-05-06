@@ -1,48 +1,30 @@
-// #include <bits/stdc++.h>
-#include <iostream>
-#include <math.h>
-#include <vector>
-#include <fstream>
-#include <algorithm>
-#include <unordered_map>
-#include <random>
-//#define gauss(n) n*(n+1)/2
+#include <bits/stdc++.h>
 using namespace std;
 
 inline long long gauss(long long n) {
     return n * (n + 1) / 2;
 }
 
-void matrix_mul(vector<vector<long long>> &a, vector<vector<long long>> &b, vector<vector<long long>> &res, long long m)
-{
+void matrix_mul(vector<vector<long long>> &a, vector<vector<long long>> &b, vector<vector<long long>> &res, long long m) {
     vector<vector<long long>> temp(a.size(), vector<long long>(a.size(), 0));
-    for (int i = 0; i < a.size(); i++)
-    {
-        for (int j = 0; j < b[0].size(); j++)
-        {
-            for (int k = 0; k < b.size(); k++)
-            {
+    for (int i = 0; i < a.size(); ++i) {
+        for (int j = 0; j < b[0].size(); ++j) {
+            for (int k = 0; k < b.size(); ++k) {
                 (temp[i][j] += a[i][k] * b[k][j]) %= m;
             }
         }
     }
-    for (int i = 0; i < a.size(); i++)
-    {
-        for (int j = 0; j < b[0].size(); j++)
-        {
+    for (int i = 0; i < a.size(); ++i) {
+        for (int j = 0; j < b[0].size(); j++) {
             res[i][j] = temp[i][j];
         }
     }
 }
 
-void matrix_pow(vector<vector<long long>> &a, vector<vector<long long>> &res, long long n, long long m)
-{
-    if (n == 1)
-    {
-        for (int i = 0; i < a.size(); i++)
-        {
-            for (int j = 0; j < a.size(); j++)
-            {
+void matrix_pow(vector<vector<long long>> &a, vector<vector<long long>> &res, long long n, long long m) {
+    if (n == 1) {
+        for (int i = 0; i < a.size(); ++i) {
+            for (int j = 0; j < a.size(); ++j) {
                 res[i][j] = a[i][j];
             }
         }
@@ -50,8 +32,7 @@ void matrix_pow(vector<vector<long long>> &a, vector<vector<long long>> &res, lo
     }
     matrix_pow(a, res, n / 2, m);
     matrix_mul(res, res, res, m);
-    if (n % 2 == 1)
-    {
+    if (n % 2 == 1) {
         matrix_mul(a, res, res, m);
     }
 }
@@ -66,96 +47,82 @@ long long binary(long long l, long long r, long long target) {
     return binary(q + 1, r, target);
 }
 
-long long hash_seq(long long siz, long long b, long long a, long long B, long long M) {
-    vector<vector<long long>> mx = 
-    {
-        { B, 0, 0 },
-        { 1, 1, 0 },
-        { 0, 1, 1 }
-    };
+long long hash_seq(vector<long long> vec, long long B, long long M) {
+    long long siz = vec[0];
+    vector<vector<long long>> mx =
+            {
+                    {B, 0, 0},
+                    {1, 1, 0},
+                    {0, 1, 1}
+            };
 
     vector<vector<long long>> mxres(3, vector<long long>(3, 0));
     long long res;
 
-    if (siz != 0)
-    {
+    if (siz != 0) {
         matrix_pow(mx, mxres, siz, M);
         res = mxres[1][0] + mxres[2][0];
         res %= M;
-    }
-    else
-    {
+    } else {
         res = 0;
     }
-
-    if (b != -1)res = (res * B + b) % M;
-    if (a != -1)res = (res * B + a) % M;
-    if (res < 0) res += M;
-    return (long long)res;
-
-}
-
-long long hash_simple(long long siz, long long b, long long a, long long B, long long M) {
-    long long res = 0;
-    for (int i = 1; i <= siz; i++)
-    {
-        res *= B;
-        res += i;
-        res %= M;
+    for(int i = 1; i < vec.size(); ++i){
+        res = (res * B + vec[i]) % M;
     }
-    if (b != -1)res = (res * B + b) % M;
-    if (a != -1)res = (res * B + a) % M;
     if (res < 0) res += M;
-    return (long long)res;
+    return (long long) res;
 }
 
-struct inpu{
-    int cas;
-    long long n,B,M;
-};
-
-bool operator<(inpu a, inpu b){
-    if(a.B != b.B) return a.B < b.B;
-    if(a.M != b.M) return a.M < b.M;
-    return a.n < b.n;
+vector<long long> find_seq(long long seq, long long n){
+    vector<long long> vec;
+    if (gauss(n) / 2 != gauss(seq)) {
+        long long diff = gauss(n) / 2 - gauss(seq - 2);
+        if (diff < n) {
+            vec.push_back(seq - 2);
+            vec.push_back(diff);
+        } else {
+            long long k = 1;
+            seq--;
+            diff = gauss(n) / 2 - gauss(seq);
+            while(!(diff >= seq + 1 && diff <= gauss(n) - gauss(n - k))){
+                diff += seq;
+                k++;
+                seq--;
+            }
+            vec.push_back(seq);
+            if(k > 1) {
+                vec.push_back(0);
+                vec.push_back(0);
+                for (int i = 1; i <= k - 2; ++i) {
+                    vec.push_back(n - (k - 2 - i));
+                    diff -= n - (k - 2 - i);
+                }
+                n -= k - 2;
+                vec[2] = n;
+                vec[1] = diff - n;
+            }else{
+                vec.push_back(diff);
+            }
+        }
+    }else{
+        vec.push_back(seq);
+    }
+    return vec;
 }
 
 int main() {
     int t;
     scanf("%d", &t);
-    vector<inpu> in(t);
-    for(int i = 0; i < t; ++i){
-        in[i].cas = i + 1;
-        scanf("%lld%lld%lld", &in[i].n, &in[i].B, &in[i].M);
-    }
-    // sort(in.begin(), in.end());
-
-    for (int i = 0; i < t; i++) {
-        long long n = in[i].n, B=in[i].B, M =in[i].M;
-        long long res, a = -1, b = -1;
-        if (gauss(n) % 2 == 0) res = binary(1, n, gauss(n) / 2);
-        else res = binary(1, n, gauss(n) / 2 + 1);
-        long long val = gauss(res);
-        if (val != gauss(n) / 2) {
-            res -= 2;
-            val = gauss(n) / 2 - gauss(res);
-            if (val < n) {
-                a = val;
-            } else {
-                if (2 * res + 3 > val) {
-                    val += res;
-                    res--;
-                }
-                b = res + 1;
-                a = val - b;
-                if(!(b > res && a <= n)){
-                    a = n;
-                    b = val - n;
-                }
-            }
+    for (int i = 0; i < t; ++i) {
+        long long n, B, M;
+        scanf("%lld%lld%lld", &n, &B, &M);
+        long long seq;
+        if (gauss(n) % 2 == 0) seq = binary(1, n, gauss(n) / 2);
+        else seq = binary(1, n, gauss(n) / 2 + 1);
+        if(gauss(n)/2 - gauss(seq) < 0){
+            seq--;
         }
-        printf("Case %d: %lld %lld\n", in[i].cas, gauss(n)%2, hash_seq(res, b, a, B, M));
-        //if(i > 700) throw "greska";
+        printf("Case %d: %lld %lld\n", i + 1, gauss(n) % 2, hash_seq(find_seq(seq, n), B, M));
     }
     return 0;
-}
+} 
