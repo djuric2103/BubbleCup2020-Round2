@@ -7,34 +7,26 @@ inline long long gauss(long long n) {
 
 void matrix_mul(vector<vector<long long>> &a, vector<vector<long long>> &b, vector<vector<long long>> &res, long long m) {
     vector<vector<long long>> temp(a.size(), vector<long long>(a.size(), 0));
-    for (int i = 0; i < a.size(); ++i) {
-        for (int j = 0; j < b[0].size(); ++j) {
-            for (int k = 0; k < b.size(); ++k) {
+    for (int i = 0; i < a.size(); ++i)
+        for (int j = 0; j < b[0].size(); ++j)
+            for (int k = 0; k < b.size(); ++k)
                 (temp[i][j] += a[i][k] * b[k][j]) %= m;
-            }
-        }
-    }
-    for (int i = 0; i < a.size(); ++i) {
-        for (int j = 0; j < b[0].size(); j++) {
+
+    for (int i = 0; i < a.size(); ++i)
+        for (int j = 0; j < b[0].size(); ++j)
             res[i][j] = temp[i][j];
-        }
-    }
 }
 
 void matrix_pow(vector<vector<long long>> &a, vector<vector<long long>> &res, long long n, long long m) {
     if (n == 1) {
-        for (int i = 0; i < a.size(); ++i) {
-            for (int j = 0; j < a.size(); ++j) {
+        for (int i = 0; i < a.size(); ++i)
+            for (int j = 0; j < a.size(); ++j)
                 res[i][j] = a[i][j];
-            }
-        }
         return;
     }
     matrix_pow(a, res, n / 2, m);
     matrix_mul(res, res, res, m);
-    if (n % 2 == 1) {
-        matrix_mul(a, res, res, m);
-    }
+    if (n % 2 == 1) matrix_mul(a, res, res, m);
 }
 
 long long binary(long long l, long long r, long long target) {
@@ -49,26 +41,15 @@ long long binary(long long l, long long r, long long target) {
 
 long long hash_seq(vector<long long> vec, long long B, long long M) {
     long long siz = vec[0];
-    vector<vector<long long>> mx =
-            {
-                    {B, 0, 0},
-                    {1, 1, 0},
-                    {0, 1, 1}
-            };
-
+    vector<vector<long long>> mx ={{B, 0, 0},{1, 1, 0},{0, 1, 1}};
     vector<vector<long long>> mxres(3, vector<long long>(3, 0));
     long long res;
-
     if (siz != 0) {
         matrix_pow(mx, mxres, siz, M);
         res = mxres[1][0] + mxres[2][0];
         res %= M;
-    } else {
-        res = 0;
-    }
-    for(int i = 1; i < vec.size(); ++i){
-        res = (res * B + vec[i]) % M;
-    }
+    } else res = 0;
+    for(int i = 1; i < vec.size(); ++i) res = (res * B + vec[i]) % M;
     if (res < 0) res += M;
     return (long long) res;
 }
@@ -101,7 +82,7 @@ int main() {
         long long seq;
         if (gauss(n) % 2 == 0) seq = binary(1, n, gauss(n) / 2);
         else seq = binary(1, n, gauss(n) / 2 + 1);
-        if(gauss(n)/2 - gauss(seq) < 0) seq--;
+        if(gauss(n)/2 - gauss(seq) < 0) --seq;
         printf("Case %d: %lld %lld\n", i + 1, gauss(n) % 2, hash_seq(find_seq(seq, n), B, M));
     }
     return 0;
